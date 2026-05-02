@@ -3,14 +3,16 @@
 # note: forked from here
 # https://github.com/scrna-bench/datasets/tree/use-anndatar
 
-library(argparse)
-library(anndataR)
-library(TENxBrainData)
-library(SingleCellMultiModal)
-library(SingleCellExperiment)
-library(DropletUtils)
-library(GEOquery)
-library(stringr)
+suppressPackageStartupMessages({
+  library(argparse)
+  library(anndataR)
+  library(TENxBrainData)
+  library(SingleCellMultiModal)
+  library(SingleCellExperiment)
+  library(DropletUtils)
+  library(GEOquery)
+  library(stringr)
+})
 
 parser <- ArgumentParser(description = "Benchmarking entrypoint")
 
