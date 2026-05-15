@@ -2,7 +2,6 @@
 
 library(argparse)
 library(zellkonverter)
-library(TENxBrainData)
 library(SingleCellMultiModal)
 library(SingleCellExperiment)
 library(DropletUtils)
@@ -146,21 +145,6 @@ if (args$dataset_name == "sc-mix") {
 
   # use provided celltype annotations as ground-truth labels
   colData(sce)$clusters.truth <- colData(sce)$celltype
-
-  # suggested qc thresholds
-  metadata(sce)$qc_thresholds <- make_qc_df(
-    nFeature_min = 200, nFeature_max = 2500,
-    nCount_max = 4000,
-    percent_mt_max = 5
-  )
-} else if (args$dataset_name == "1.3m") {
-  # fetch 10x 1.3M data
-  sce <- TENxBrainData()
-  rownames(sce) <- rowData(sce)$Symbol
-
-  # cluster labels are set to the library index for the full pipeline to run
-  # the ARIs computed from this dataset do not have any biological significance
-  colData(sce)$clusters.truth <- colData(sce)$Library
 
   # suggested qc thresholds
   metadata(sce)$qc_thresholds <- make_qc_df(
