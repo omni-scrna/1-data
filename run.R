@@ -52,6 +52,13 @@ parser$add_argument(
 
 args <- parser$parse_args()
 
+# handle null values
+for (k in c("batch_var", "sample_var", "labels_var")) {
+  if (!is.null(args[[k]]) && tolower(args[[k]]) %in% c("none", "null", "")) {
+    args[[k]] <- NULL
+  }
+}
+
 h5ad_path <- file.path(args$output_dir, paste0(args$name, ".h5ad"))
 clusters_truth_path <- file.path(
   args$output_dir, paste0(args$name, ".clusters_truth.tsv")
@@ -192,7 +199,7 @@ for (var_name in c("batch_var", "sample_var", "labels_var")) {
   val <- args[[var_name]]
   if (!is.null(val) && !(val %in% col_names)) {
     stop(sprintf("--%s='%s' not found in colData. Available columns: %s",
-                 var_name, val, paste(col_names, collapse = ", ")))
+      var_name, val, paste(col_names, collapse = ", ")))
   }
 }
 
