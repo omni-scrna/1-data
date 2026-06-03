@@ -67,7 +67,7 @@ num_clusters_truth_path <- file.path(
   args$output_dir, paste0(args$name, ".clusters_truth_num.txt")
 )
 properties_path <- file.path(
-  args$output_dir, paste0(args$name, "_properties.info")
+  args$output_dir, paste0(args$name, "_properties.yaml")
 )
 
 make_qc_df <- function(
@@ -219,7 +219,7 @@ clusters_truth_num <- length(unique(sce$clusters.truth))
 write("writing cluster number ..", stderr())
 writeLines(as.character(clusters_truth_num), con = num_clusters_truth_path)
 
-write("writing properties.info ..", stderr())
+write("writing properties.yaml ..", stderr())
 yaml::write_yaml(
   list(
     batch_var = args$batch_var,
