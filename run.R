@@ -11,6 +11,7 @@ suppressPackageStartupMessages({
   library(DropletUtils)
   library(GEOquery)
   library(stringr)
+  library(yaml)
 })
 
 parser <- ArgumentParser(description = "Benchmarking entrypoint")
@@ -33,8 +34,30 @@ parser$add_argument(
   help = "name of the dataset",
   choices = c("sc-mix", "be1", "cb", "1.3m"), required = TRUE
 )
+parser$add_argument(
+  "--batch_var",
+  dest = "batch_var", type = "character", default = NULL,
+  help = "obs column name for batch variable (NULL if no batch structure)"
+)
+parser$add_argument(
+  "--sample_var",
+  dest = "sample_var", type = "character", default = NULL,
+  help = "obs column name for sample ID variable (NULL if not applicable)"
+)
+parser$add_argument(
+  "--labels_var",
+  dest = "labels_var", type = "character", default = NULL,
+  help = "obs column name for cell type labels (NULL if not applicable)"
+)
 
 args <- parser$parse_args()
+
+# handle null values
+for (k in c("batch_var", "sample_var", "labels_var")) {
+  if (!is.null(args[[k]]) && tolower(args[[k]]) %in% c("none", "null", "")) {
+    args[[k]] <- NULL
+  }
+}
 
 h5ad_path <- file.path(args$output_dir, paste0(args$name, ".h5ad"))
 clusters_truth_path <- file.path(
@@ -42,6 +65,9 @@ clusters_truth_path <- file.path(
 )
 num_clusters_truth_path <- file.path(
   args$output_dir, paste0(args$name, ".clusters_truth_num.txt")
+)
+properties_path <- file.path(
+  args$output_dir, paste0(args$name, "_properties.yaml")
 )
 
 make_qc_df <- function(
@@ -167,6 +193,16 @@ write("filtering NA ground truth ..", stderr())
 # filter NA annotated cells
 sce <- sce[, !is.na(colData(sce)$clusters.truth)]
 
+# validate declared variables exist in colData
+col_names <- colnames(colData(sce))
+for (var_name in c("batch_var", "sample_var", "labels_var")) {
+  val <- args[[var_name]]
+  if (!is.null(val) && !(val %in% col_names)) {
+    stop(sprintf("--%s='%s' not found in colData. Available columns: %s",
+      var_name, val, paste(col_names, collapse = ", ")))
+  }
+}
+
 # write outputs
 write("writing h5ad ..", stderr())
 write_h5ad(sce, h5ad_path)
@@ -182,3 +218,14 @@ write.table(
 clusters_truth_num <- length(unique(sce$clusters.truth))
 write("writing cluster number ..", stderr())
 writeLines(as.character(clusters_truth_num), con = num_clusters_truth_path)
+
+write("writing properties.yaml ..", stderr())
+yaml::write_yaml(
+  list(
+    batch_var = args$batch_var,
+    sample_var = args$sample_var,
+    labels_var = args$labels_var
+  ),
+  properties_path
+)
+write(sprintf("  wrote: %s", properties_path), stderr())
