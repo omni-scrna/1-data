@@ -168,7 +168,7 @@ if (args$dataset_name == "sc-mix") {
 
   if(args$dataset_name == "be1-subset") {
     set.seed(17062026)
-    s <- sample(ncol(sce), 2000)
+    s <- sample(ncol(sce), 5000)
     sce <- sce[,s]
   }
 } else if (args$dataset_name == "cb") {
