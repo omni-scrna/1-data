@@ -32,7 +32,7 @@ parser$add_argument(
   "--dataset_name",
   dest = "dataset_name", type = "character",
   help = "name of the dataset",
-  choices = c("sc-mix", "be1", "cb", "1.3m"), required = TRUE
+  choices = c("sc-mix", "be1", "be1-subset", "cb", "1.3m"), required = TRUE
 )
 parser$add_argument(
   "--batch_var",
@@ -108,7 +108,7 @@ if (args$dataset_name == "sc-mix") {
     nCount_max = 60000,
     percent_mt_max = 10
   )
-} else if (args$dataset_name == "be1") {
+} else if (args$dataset_name == "be1" || args$dataset_name == "be1-subset") {
   # download GEO files for be1
   gse_id <- "GSE243665"
   getGEOSuppFiles(
@@ -165,6 +165,12 @@ if (args$dataset_name == "sc-mix") {
     nCount_max = 25000,
     percent_mt_max = 5
   )
+
+  if(args$dataset_name == "be1-subset") {
+    set.seed(17062026)
+    s <- sample(ncol(sce), 2000)
+    sce <- sce[,s]
+  }
 } else if (args$dataset_name == "cb") {
   # load Cord blood CITEseq data
   sce <- CITEseq(
