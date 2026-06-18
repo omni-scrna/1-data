@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# note: forked from here
+# note: originally forked from here
 # https://github.com/scrna-bench/datasets/tree/use-anndatar
 
 suppressPackageStartupMessages({
@@ -36,7 +36,7 @@ for (k in c("batch_var", "sample_var", "labels_var")) {
 }
 
 cat(sprintf("LOG: command line args\n----------------------------------\n"))
-for (i in length(args)) {
+for (i in 1:length(args)) {
   cat(sprintf("  %s: %s\n", names(args)[i], args[[i]]))
 }
 cat(sprintf("LOG: command line args\n----------------------------------\n"))
