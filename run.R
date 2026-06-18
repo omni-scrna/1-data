@@ -39,7 +39,7 @@ cat(sprintf("LOG: command line args\n----------------------------------\n"))
 for (i in 1:length(args)) {
   cat(sprintf("  %s: %s\n", names(args)[i], args[[i]]))
 }
-cat(sprintf("LOG: command line args\n----------------------------------\n"))
+cat(sprintf("----------------------------------\n"))
 
 h5ad_path <- file.path(args$output_dir, paste0(args$name, ".h5ad"))
 clusters_truth_path <- file.path(
