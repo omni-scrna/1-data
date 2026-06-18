@@ -4,7 +4,6 @@
 # https://github.com/scrna-bench/datasets/tree/use-anndatar
 
 suppressPackageStartupMessages({
-  library(argparse)
   library(anndataR)
   library(SingleCellMultiModal)
   library(SingleCellExperiment)
@@ -14,43 +13,20 @@ suppressPackageStartupMessages({
   library(yaml)
 })
 
-parser <- ArgumentParser(description = "Benchmarking entrypoint")
+# arg parsing
+source("src/common/cli.R")
+p <- arg_parser("DATA module")
+p <- add_base_args(p)               # --output_dir, --name
+#p <- add_stage_args(p, "one-data")  # the stage I/O contract (none here, actually)
+# method params — argparser directly (its add_argument requires `help`):
+p <- add_argument(p, "--dataset_name", type = "character", help = "dataset identifier")
+p <- add_argument(p, "--batch_var", type = "character", help = "batch column name")
+p <- add_argument(p, "--sample_var", type = "character", help = "sample column name")
+p <- add_argument(p, "--labels_var", type = "character", help = "cell type labels column name")
+args <- parse_args(p)                      # argparser's own parser
 
-parser$add_argument(
-  "--output_dir", "-o",
-  dest = "output_dir", type = "character",
-  help = "output directory where files will be saved",
-  default = getwd(), required = TRUE
-)
-parser$add_argument(
-  "--name", "-n",
-  dest = "name", type = "character",
-  help = "name of the module",
-  required = TRUE
-)
-parser$add_argument(
-  "--dataset_name",
-  dest = "dataset_name", type = "character",
-  help = "name of the dataset",
-  choices = c("sc-mix", "be1", "be1-subset", "cb", "1.3m"), required = TRUE
-)
-parser$add_argument(
-  "--batch_var",
-  dest = "batch_var", type = "character", default = NULL,
-  help = "obs column name for batch variable (NULL if no batch structure)"
-)
-parser$add_argument(
-  "--sample_var",
-  dest = "sample_var", type = "character", default = NULL,
-  help = "obs column name for sample ID variable (NULL if not applicable)"
-)
-parser$add_argument(
-  "--labels_var",
-  dest = "labels_var", type = "character", default = NULL,
-  help = "obs column name for cell type labels (NULL if not applicable)"
-)
-
-args <- parser$parse_args()
+# logging
+cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
 
 # handle null values
 for (k in c("batch_var", "sample_var", "labels_var")) {
@@ -58,6 +34,12 @@ for (k in c("batch_var", "sample_var", "labels_var")) {
     args[[k]] <- NULL
   }
 }
+
+cat(sprintf("LOG: command line args\n----------------------------------\n"))
+for (i in length(args)) {
+  cat(sprintf("  %s: %s\n", names(args)[i], args[[i]]))
+}
+cat(sprintf("LOG: command line args\n----------------------------------\n"))
 
 h5ad_path <- file.path(args$output_dir, paste0(args$name, ".h5ad"))
 clusters_truth_path <- file.path(

@@ -1,0 +1,26 @@
+{
+  "engine": {
+    "repo": "https://github.com/omni-scrna/boilerplate",
+    "ref": "main",
+    "commit": "6fed2ba04b5d7f7fe7627b592b6667abb302aa8e",
+    "version": "0.1.0",
+    "lang": "r"
+  },
+  "schemas": [
+    {
+      "benchmark": "split-stages",
+      "repo": "https://github.com/omni-scrna/split-stages-plan",
+      "ref": "main",
+      "commit": "4d74d2c812cc25cac3cf3d06c62ff369ea27c5c1",
+      "files": [
+        "_base",
+        "five-pca",
+        "nngraph",
+        "six-embedding-metrics",
+        "three-normalize",
+        "two-filter"
+      ]
+    }
+  ],
+  "fetched_at": "2026-06-18T17:53:42Z"
+}
