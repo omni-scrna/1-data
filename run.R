@@ -5,11 +5,11 @@
 
 suppressPackageStartupMessages({
   library(anndataR)
-  library(SingleCellMultiModal)
   library(SingleCellExperiment)
   library(DropletUtils)
   library(GEOquery)
   library(stringr)
+  library(ExperimentHub)
   library(yaml)
 })
 
@@ -155,10 +155,22 @@ if (args$dataset_name == "sc-mix") {
   }
 } else if (args$dataset_name == "cb") {
   # load Cord blood CITEseq data
-  sce <- CITEseq(
-    DataType = "cord_blood", modes = "*", dry.run = FALSE, version = "1.0.0",
-    DataClass = "SingleCellExperiment"
-  )
+
+  eh <- ExperimentHub()
+  counts <- eh[["EH3796"]]
+  coldata <- eh[["EH8228"]]
+
+  m <- match(rownames(coldata), colnames(counts))
+  stopifnot( sum(is.na(m))==0 )
+
+  sce <- SingleCellExperiment(list(counts = counts[,m]),
+                              colData = coldata)
+
+  #library(SingleCellMultiModal)
+  #sce <- CITEseq(
+  #  DataType = "cord_blood", modes = "*", dry.run = FALSE, version = "1.0.0",
+  #  DataClass = "SingleCellExperiment"
+  #)
 
   # keep human genes and drop the "HUMAN_" prefix for consistency
   gene_m <- grep("^HUMAN_", rownames(sce), value = TRUE)
