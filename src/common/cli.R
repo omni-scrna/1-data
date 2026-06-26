@@ -7,25 +7,21 @@
 # naming, typing and parsing (no required/choices/dest handling — that's the Python
 # engine). The author adds their own params and parses directly:
 #
-#   cli <- new.env(); source("src/common/cli.R", local = cli)
-#   p <- arg_parser("PCA module")
-#   p <- cli$add_base_args(p)                  # --output_dir, --name
-#   p <- cli$add_stage_args(p, "embedding")    # the stage I/O contract
-#   p <- add_argument(p, "--n_components", type = "integer", help = "PCs")  # your own
-#   args <- parse_args(p)                       # argparser's own parser
+# source("src/common/cli.R")
+# p <- arg_parser("my module")
+# p <- add_base_args(p)                    # --output_dir, --name
+# p <- add_stage_args(p, "two-filter")     # the stage I/O contract
+## your own method params — argparser directly (its add_argument requires `help`):
+# p <- add_argument(p, "--n_components", type = "integer", help = "number of PCs")
+# args <- parse_args(p)
 #
 # These files are *copied* in by scripts/pull.py, not hand-written. See
-# docs/common-code.md and docs/cli.md. Schema arg-spec: {flag, type, help?};
-# types path|string|integer|number (path/string -> character).
+# docs/common-code.md and docs/cli.md.
 
 suppressPackageStartupMessages(library(argparser))
 
-COMMON_VERSION <- "0.1.0"  # x-release-version — stamped from src/common/VERSION by `pixi run version`
-SCHEMA_DIR <- "src/common/schema"   # copied-in layout; override per call or set once after sourcing
-
-common_version <- function() COMMON_VERSION
-
-`%||%` <- function(a, b) if (is.null(a)) b else a
+# where the schemas were copied on sync
+SCHEMA_DIR <- "src/common/schema"
 
 # Add a schema file's args onto the author's parser; argparser does the rest.
 .inject <- function(p, path) {
@@ -38,5 +34,5 @@ common_version <- function() COMMON_VERSION
 
 # On purpose, we don't try to enforce options or choices — left for later.
 
-add_base_args  <- function(p, schema_dir = SCHEMA_DIR) .inject(p, file.path(schema_dir, "_base.json"))
-add_stage_args <- function(p, interface, schema_dir = SCHEMA_DIR) .inject(p, file.path(schema_dir, paste0(interface, ".json")))
+add_base_args  <- function(p) .inject(p, file.path(SCHEMA_DIR, "_base.json"))
+add_stage_args <- function(p, schema) .inject(p, file.path(SCHEMA_DIR, paste0(schema, ".json")))
