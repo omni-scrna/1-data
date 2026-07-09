@@ -232,13 +232,16 @@ write("writing h5ad ..", stderr())
 write_h5ad(sce, h5ad_path)
 write("writing clusters df ..", stderr())
 truth_values <- as.character(colData(sce)[[truth_col]])
+cl_values <- colData(sce)$CL_label
+if (is.null(cl_values)) cl_values <- NA_character_
 write.table(
   data.frame(
     cell_id = colnames(sce),
-    truths = truth_values
+    truths = truth_values,
+    truths_cl = cl_values
   ),
   clusters_truth_path,
-  sep = "\t", quote = FALSE, row.names = FALSE
+  sep = "\t", quote = FALSE, row.names = FALSE, na = ""
 )
 clusters_truth_num <- length(unique(truth_values))
 write("writing cluster number ..", stderr())
