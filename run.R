@@ -11,6 +11,7 @@ suppressPackageStartupMessages({
   library(stringr)
   library(ExperimentHub)
   library(yaml)
+  library(scRNAseq)
 })
 
 # arg parsing
@@ -153,6 +154,101 @@ if (args$dataset_name == "sc-mix") {
     s <- sample(ncol(sce), 5000)
     sce <- sce[,s]
   }
+} else if (args$dataset_name == "pancreas") {
+
+  baron       <- BaronPancreasData("human")
+  muraro      <- MuraroPancreasData()
+  segerstolpe <- SegerstolpePancreasData()
+  # Xin excluded: uses RPKM (not raw counts) and has no gene symbols in rowData
+
+  # harmonize cell type label column to clusters.truth
+  baron$clusters.truth       <- baron$label
+  muraro$clusters.truth      <- muraro$label
+  segerstolpe$clusters.truth <- segerstolpe[["cell type"]]
+
+  # add study as batch variable
+  baron$study       <- "Baron"
+  muraro$study      <- "Muraro"
+  segerstolpe$study <- "Segerstolpe"
+
+  # keep only cells with known cell type
+  baron       <- baron[, !is.na(baron$clusters.truth)]
+  muraro      <- muraro[, !is.na(muraro$clusters.truth)]
+  segerstolpe <- segerstolpe[, !is.na(segerstolpe$clusters.truth)]
+
+  realize_sce <- function(sce, prefix) {
+    nr <- nrow(sce); nc <- ncol(sce)
+    new_ids <- paste0(prefix, "_", seq_len(nc))
+    mat <- matrix(as.vector(assay(sce, 1)), nrow = nr, ncol = nc)
+    rownames(mat) <- rownames(sce)
+    colnames(mat) <- new_ids
+    # keep only the two harmonized columns so cbind works across all four datasets
+    cd <- data.frame(
+      clusters.truth = sce$clusters.truth,
+      study          = sce$study,
+      row.names      = new_ids,
+      stringsAsFactors = FALSE
+    )
+    SingleCellExperiment(list(counts = mat), colData = cd)
+  }
+  # Muraro stores genes as "SYMBOL__chrN" — strip the chromosome suffix
+  rownames(muraro) <- make.unique(gsub("__chr.*$", "", rownames(muraro)))
+
+  baron       <- realize_sce(baron, "Baron")
+  muraro      <- realize_sce(muraro, "Muraro")
+  segerstolpe <- realize_sce(segerstolpe, "Segerstolpe")
+
+  # intersect genes across studies
+  common_genes <- Reduce(intersect, list(
+    rownames(baron), rownames(muraro), rownames(segerstolpe)
+  ))
+  cat(sprintf("common_genes: %d\n", length(common_genes)))
+  if (length(common_genes) == 0) stop("No common genes — check gene ID formats")
+
+  sce <- cbind(
+    baron[common_genes, ],
+    muraro[common_genes, ],
+    segerstolpe[common_genes, ]
+  )
+  metadata(sce) <- list()
+
+  # unify cell type labels across studies
+  label_map <- c(
+    "acinar cell"        = "acinar",
+    "alpha cell"         = "alpha",
+    "beta cell"          = "beta",
+    "delta cell"         = "delta",
+    "ductal cell"        = "ductal",
+    "duct"               = "ductal",
+    "endothelial cell"   = "endothelial",
+    "epsilon cell"       = "epsilon",
+    "gamma cell"         = "gamma",
+    "pp"                 = "gamma",
+    "PP"                 = "gamma"
+  )
+  # exclude: contaminated, stromal (inconsistently labeled across studies),
+  # and rare non-pancreatic cells — keep only the 8 core types
+  exclude_labels <- c(
+    "activated_stellate", "quiescent_stellate",
+    "mesenchymal", "PSC cell",
+    "co-expression cell", "MHC class II cell",
+    "unclassified cell", "unclassified endocrine cell",
+    "unclear", "macrophage", "mast", "mast cell",
+    "schwann", "t_cell"
+  )
+  sce$clusters.truth <- ifelse(
+    sce$clusters.truth %in% names(label_map),
+    label_map[sce$clusters.truth],
+    sce$clusters.truth
+  )
+  sce <- sce[, !(sce$clusters.truth %in% exclude_labels)]
+
+  # suggested qc thresholds
+  metadata(sce)$qc_thresholds <- make_qc_df(
+    nFeature_min = 200, nFeature_max = 8000,
+    nCount_max = 500000,
+    percent_mt_max = 30
+  )
 } else if (args$dataset_name == "cb") {
   # load Cord blood CITEseq data
 
@@ -205,6 +301,7 @@ for (var_name in c("batch_var", "sample_var", "labels_var")) {
 
 # write outputs
 write("writing h5ad ..", stderr())
+logcounts(sce) <- assay(sce, "counts")
 write_h5ad(sce, h5ad_path)
 write("writing clusters df ..", stderr())
 write.table(
