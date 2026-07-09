@@ -220,7 +220,7 @@ for (var_name in c("batch_var", "sample_var", "labels_var")) {
   }
 }
 
-truth_col <- if (!is.null(args$labels_var)) args$label_var else "clusters.truth"
+truth_col <- if (!is.null(args$labels_var)) args$labels_var else "clusters.truth"
 
 write("Filtering NA ground truth ...", stderr())
 
