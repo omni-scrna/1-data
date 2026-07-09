@@ -208,7 +208,7 @@ if (args$dataset_name == "sc-mix") {
 
 # add Cell Ontology lables (CL_label colData column) where a mapping exists
 write("Mapping cell types to Cell Ontology ...", stderr())
-sce <- add_cl_label(sce, args$dataset.name)
+sce <- add_cl_label(sce, args$dataset_name)
 
 # validate declared variables exist in colData
 col_names <- colnames(colData(sce))
