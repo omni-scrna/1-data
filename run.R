@@ -78,7 +78,7 @@ add_cl_label <- function(sce, dataset_name) {
   cl[!is.na(cl) & cl == ""] <- NA_character_
   n_unmapped <- sum(is.na(cl) & !is.na(truth))
   if (n_unmapped > 0) {
-    write(sprintf("%d cells have a truth label with no mapping - CL label = NA, n_unmapped), stderr())
+    write(sprintf("%d cells have a truth label with no mapping - CL label = NA", n_unmapped), stderr())
   }
   colData(sce)$CL_label <- cl
   sce
@@ -207,7 +207,7 @@ if (args$dataset_name == "sc-mix") {
 }
 
 # add Cell Ontology lables (CL_label colData column) where a mapping exists
-write("Mapping cell types to Cell Ontology ..." stderr())
+write("Mapping cell types to Cell Ontology ...", stderr())
 sce <- add_cl_labels(sce, args$dataset.name)
 
 # validate declared variables exist in colData
