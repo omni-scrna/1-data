@@ -65,6 +65,24 @@ make_qc_df <- function(
   )
 }
 
+add_cl_label <- function(sce, dataset_name) {
+  map_path <- file.path("mappings", paste0(dataset_name, "_celltype_to_cl.tsv"))
+  if (!file.exists(map_path)) {
+    write(sprintf("No mapping table for %s found - no CL label added", dataset_name), stderr())
+    return(sce)
+  }
+  map <- read.delim(map_path, stringsAsFactors = FALSE)
+  cl_by_label <- setNames(map$cl_id, map$source_label)
+  truth <- as.character(colData(sce)$clusters.truth)
+  cl <- unname(cl_by_label[truth])
+  cl[!is.na(cl) & cl == ""] <- NA_character_
+  n_unmapped <- sum(is.na(cl) & !is.na(truth))
+  if (n_unmapped > 0) {
+    write(sprintf("%d cells have a truth label with no mapping - CL label = NA, n_unmapped), stderr())
+  }
+  colData(sce)$CL_label <- cl
+  sce
+}
 
 write("loading datasets ..", stderr())
 
@@ -188,10 +206,9 @@ if (args$dataset_name == "sc-mix") {
   )
 }
 
-write("filtering NA ground truth ..", stderr())
-
-# filter NA annotated cells
-sce <- sce[, !is.na(colData(sce)$clusters.truth)]
+# add Cell Ontology lables (CL_label colData column) where a mapping exists
+write("Mapping cell types to Cell Ontology ..." stderr())
+sce <- add_cl_labels(sce, args$dataset.name)
 
 # validate declared variables exist in colData
 col_names <- colnames(colData(sce))
@@ -203,19 +220,27 @@ for (var_name in c("batch_var", "sample_var", "labels_var")) {
   }
 }
 
+truth_col <- if (!is.null(args$labels_var)) args$label_var else "clusters.truth"
+
+write("Filtering NA ground truth ...", stderr())
+
+# filter cells with no ground-truth label in the chosen truth column
+sce <- sce[, !is.na(colData(sce)[[truth_col]])]
+
 # write outputs
 write("writing h5ad ..", stderr())
 write_h5ad(sce, h5ad_path)
 write("writing clusters df ..", stderr())
+truth_values <- as.character(colData(sce)[[truth_col]])
 write.table(
   data.frame(
     cell_id = colnames(sce),
-    truths = sce$clusters.truth
+    truths = truth_values
   ),
   clusters_truth_path,
   sep = "\t", quote = FALSE, row.names = FALSE
 )
-clusters_truth_num <- length(unique(sce$clusters.truth))
+clusters_truth_num <- length(unique(truth_values))
 write("writing cluster number ..", stderr())
 writeLines(as.character(clusters_truth_num), con = num_clusters_truth_path)
 
