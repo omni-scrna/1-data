@@ -197,7 +197,7 @@ if (args$dataset_name == "sc-mix") {
   realize_sce <- function(sce, prefix) {
     nr <- nrow(sce); nc <- ncol(sce)
     new_ids <- paste0(prefix, "_", seq_len(nc))
-    mat <- matrix(as.vector(assay(sce, 1)), nrow = nr, ncol = nc)
+    mat <- matrix(as.vector(assay(sce, "counts")), nrow = nr, ncol = nc)
     rownames(mat) <- rownames(sce)
     colnames(mat) <- new_ids
     # keep only the two harmonized columns so cbind works across all four datasets
