@@ -210,7 +210,7 @@ if (args$dataset_name == "sc-mix") {
     SingleCellExperiment(list(counts = mat), colData = cd)
   }
   # Muraro stores genes as "SYMBOL__chrN" — strip the chromosome suffix
-  rownames(muraro) <- make.unique(gsub("__chr.*$", "", rownames(muraro)))
+  # rownames(muraro) <- make.unique(gsub("__chr.*$", "", rownames(muraro)))
 
   baron       <- realize_sce(baron, "Baron")
   #muraro      <- realize_sce(muraro, "Muraro")
