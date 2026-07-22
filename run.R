@@ -175,23 +175,23 @@ if (args$dataset_name == "sc-mix") {
 } else if (args$dataset_name == "pancreas") {
 
   baron       <- BaronPancreasData("human")
-  muraro      <- MuraroPancreasData()
+  #muraro      <- MuraroPancreasData()
   segerstolpe <- SegerstolpePancreasData()
   # Xin excluded: uses RPKM (not raw counts) and has no gene symbols in rowData
 
   # harmonize cell type label column to clusters.truth
   baron$clusters.truth       <- baron$label
-  muraro$clusters.truth      <- muraro$label
+  #muraro$clusters.truth      <- muraro$label
   segerstolpe$clusters.truth <- segerstolpe[["cell type"]]
 
   # add study as batch variable
   baron$study       <- "Baron"
-  muraro$study      <- "Muraro"
+  #muraro$study      <- "Muraro"
   segerstolpe$study <- "Segerstolpe"
 
   # keep only cells with known cell type
   baron       <- baron[, !is.na(baron$clusters.truth)]
-  muraro      <- muraro[, !is.na(muraro$clusters.truth)]
+  #muraro      <- muraro[, !is.na(muraro$clusters.truth)]
   segerstolpe <- segerstolpe[, !is.na(segerstolpe$clusters.truth)]
 
   realize_sce <- function(sce, prefix) {
@@ -213,19 +213,21 @@ if (args$dataset_name == "sc-mix") {
   rownames(muraro) <- make.unique(gsub("__chr.*$", "", rownames(muraro)))
 
   baron       <- realize_sce(baron, "Baron")
-  muraro      <- realize_sce(muraro, "Muraro")
+  #muraro      <- realize_sce(muraro, "Muraro")
   segerstolpe <- realize_sce(segerstolpe, "Segerstolpe")
 
   # intersect genes across studies
   common_genes <- Reduce(intersect, list(
-    rownames(baron), rownames(muraro), rownames(segerstolpe)
+    rownames(baron),
+    #rownames(muraro),
+    rownames(segerstolpe)
   ))
   cat(sprintf("common_genes: %d\n", length(common_genes)))
   if (length(common_genes) == 0) stop("No common genes — check gene ID formats")
 
   sce <- cbind(
     baron[common_genes, ],
-    muraro[common_genes, ],
+    #muraro[common_genes, ],
     segerstolpe[common_genes, ]
   )
   metadata(sce) <- list()
@@ -322,6 +324,9 @@ write("Filtering NA ground truth ...", stderr())
 
 # filter cells with no ground-truth label in the chosen truth column
 sce <- sce[, !is.na(colData(sce)[[truth_col]])]
+
+# check if all counts are integers 
+stopifnot("Dataset contains not integer counts" = any(counts(sce) == round(counts(sce))))
 
 # write outputs
 write("writing h5ad ..", stderr())
