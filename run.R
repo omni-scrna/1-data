@@ -326,11 +326,10 @@ write("Filtering NA ground truth ...", stderr())
 sce <- sce[, !is.na(colData(sce)[[truth_col]])]
 
 # check if all counts are integers 
-stopifnot("Dataset contains not integer counts" = any(counts(sce) == round(counts(sce))))
+stopifnot("Dataset contains not integer counts" = all(counts(sce) == round(counts(sce))))
 
 # write outputs
 write("writing h5ad ..", stderr())
-logcounts(sce) <- assay(sce, "counts")
 write_h5ad(sce, h5ad_path)
 write("writing clusters df ..", stderr())
 truth_values <- as.character(colData(sce)[[truth_col]])
