@@ -1,5 +1,6 @@
 entrypoints:
-  default: run.R
+  download_filtered: download_filtered.R
+  download_raw: download_raw.R
 
 # Pointed to shared CLI helper code
 templates:

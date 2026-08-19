@@ -18,7 +18,7 @@ suppressPackageStartupMessages({
 source("src/common/cli.R")
 p <- arg_parser("DATA module")
 p <- add_base_args(p)               # --output_dir, --name
-#p <- add_stage_args(p, "one-data")  # the stage I/O contract (none here, actually)
+p <- add_stage_args(p, "download_filtered") 
 # method params — argparser directly (its add_argument requires `help`):
 p <- add_argument(p, "--dataset_name", type = "character", help = "dataset identifier")
 p <- add_argument(p, "--batch_var", type = "character", help = "batch column name")
