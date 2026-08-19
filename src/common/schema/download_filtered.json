@@ -1,0 +1,9 @@
+{
+  "stage": "cleaning",
+  "version": "0.1.0",
+  "benchmark": "omni-scrna/ambient-plan",
+  "args": [
+    { "flag": "--rawdata_raw_h5ad", "type": "path", "help": "Raw h5ad count matrix (unfiltered, with pool_id in obs)" },
+    { "flag": "--called_cells_tsv", "type": "path", "help": "TSV with called cell barcodes (cell_id, pool_id, species, sample_id, majority_ratio)" }
+  ]
+}
