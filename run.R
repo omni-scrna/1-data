@@ -317,8 +317,8 @@ if (args$dataset_name == "sc-mix") {
     nCount_max = 42000,
     percent_mt_max = 20
   )
+  rownames(sce) <- make.unique(rownames(sce))
   write("Done.", stderr())
-
 } 
 
 
@@ -340,8 +340,8 @@ for (var_name in c("batch_var", "sample_var", "labels_var")) {
 truth_col <- if (!is.null(args$labels_var)) args$labels_var else "clusters.truth"
 
 write("Filtering NA ground truth ...", stderr())
-
 # filter cells with no ground-truth label in the chosen truth column
+write(paste("Number of ground truth NAs: ", is.na(colData(sce)[[truth_col]])), stderr())
 sce <- sce[, !is.na(colData(sce)[[truth_col]])]
 
 # check if all counts are integers 
