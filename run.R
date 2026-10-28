@@ -11,7 +11,6 @@ suppressPackageStartupMessages({
   library(stringr)
   library(ExperimentHub)
   library(yaml)
-  library(scRNAseq)
 })
 
 # arg parsing
@@ -318,6 +317,7 @@ if (args$dataset_name == "sc-mix") {
     percent_mt_max = 20
   )
   rownames(sce) <- make.unique(rownames(sce))
+  colnames(sce) <- make.unique(colnames(sce))
   write("Done.", stderr())
 } 
 
