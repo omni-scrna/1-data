@@ -303,7 +303,23 @@ if (args$dataset_name == "sc-mix") {
     nCount_max = 4000,
     percent_mt_max = 5
   )
-}
+} else if (args$dataset_name == "Zilioni") {
+  library(scRNAseq)
+  sce <- scRNAseq::ZilionisLungData()
+  sce <- sce[,!is.na(sce$`Major cell type`)]
+  gene.keep <- rowSums(counts(sce)>0)>10
+  sce <- sce[gene.keep,]
+  colData(sce)$clusters.truth <- sce$`Major cell type`
+  # suggested qc thresholds
+  metadata(sce)$qc_thresholds <- make_qc_df(
+    nFeature_min = 300, nFeature_max = 20000,
+    nCount_max = 42000,
+    percent_mt_max = 20
+  )
+
+} 
+
+
 
 # add Cell Ontology lables (CL_label colData column) where a mapping exists
 write("Mapping cell types to Cell Ontology ...", stderr())
