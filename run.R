@@ -304,6 +304,7 @@ if (args$dataset_name == "sc-mix") {
     percent_mt_max = 5
   )
 } else if (args$dataset_name == "Zilioni") {
+  write("Reading Zilioni dataset from 'scRNAseq' package ..", stderr())
   library(scRNAseq)
   sce <- scRNAseq::ZilionisLungData()
   sce <- sce[,!is.na(sce$`Major cell type`)]
@@ -316,6 +317,7 @@ if (args$dataset_name == "sc-mix") {
     nCount_max = 42000,
     percent_mt_max = 20
   )
+  write("Done.", stderr())
 
 } 
 
