@@ -4,7 +4,7 @@ entrypoints:
 # Pointed to shared CLI helper code
 templates:
   repo: https://github.com/omni-scrna/boilerplate
-  ref: named-outputs   # --output id=PATH (api 0.8); back to main once merged
+  ref: api-0.8.0       # --output id=PATH (api 0.8); back to main once merged
   lang: r
 
 # Benchmark(s) that this module plugs into; `sync` vendors each one's schema/ dir into

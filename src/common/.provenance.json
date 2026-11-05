@@ -1,8 +1,8 @@
 {
   "engine": {
     "repo": "https://github.com/omni-scrna/boilerplate",
-    "ref": "named-outputs",
-    "commit": "6ad7f98456f45cb2f3061be2d06bc4551fa96b42",
+    "ref": "api-0.8.0",
+    "commit": "d8d6e46fdf7ffd80f1752feae6d4ef6c31519fa8",
     "version": null,
     "lang": "r"
   },
