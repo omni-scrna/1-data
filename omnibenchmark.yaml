@@ -4,7 +4,7 @@ entrypoints:
 # Pointed to shared CLI helper code
 templates:
   repo: https://github.com/omni-scrna/boilerplate
-  ref: main            # the engine lives on boilerplate main
+  ref: named-outputs   # --output id=PATH (api 0.8); back to main once merged
   lang: r
 
 # Benchmark(s) that this module plugs into; `sync` vendors each one's schema/ dir into
@@ -13,5 +13,5 @@ benchmarks:
   - name: split-stages
     repo: https://github.com/omni-scrna/split-stages-plan
     plan: benchmark_conda.yaml
-    ref: new-stage-naming
+    ref: api-0.8.0
 
