@@ -24,7 +24,7 @@ p <- add_argument(p, "--dataset_name", type = "character", help = "dataset ident
 p <- add_argument(p, "--batch_var", type = "character", help = "batch column name")
 p <- add_argument(p, "--sample_var", type = "character", help = "sample column name")
 p <- add_argument(p, "--labels_var", type = "character", help = "cell type labels column name")
-args <- parse_args(p)                      # argparser's own parser
+args <- parse_args_outputs(p)              # strips --output id=PATH (api >= 0.8), then argparser
 
 # logging
 cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
@@ -38,20 +38,16 @@ for (k in c("batch_var", "sample_var", "labels_var")) {
 
 cat(sprintf("LOG: command line args\n----------------------------------\n"))
 for (i in 1:length(args)) {
-  cat(sprintf("  %s: %s\n", names(args)[i], args[[i]]))
+  cat(sprintf("  %s: %s\n", names(args)[i], paste(unlist(args[[i]]), collapse = " ")))
 }
 cat(sprintf("----------------------------------\n"))
 
-h5ad_path <- file.path(args$output_dir, paste0(args$name, ".h5ad"))
-clusters_truth_path <- file.path(
-  args$output_dir, paste0(args$name, ".clusters_truth.tsv")
-)
-num_clusters_truth_path <- file.path(
-  args$output_dir, paste0(args$name, ".clusters_truth_num.txt")
-)
-properties_path <- file.path(
-  args$output_dir, paste0(args$name, "_properties.yaml")
-)
+# api >= 0.8 passes each path as --output id=PATH; older plans get
+# <output_dir>/<name><suffix>, as before.
+h5ad_path <- output_path(args, "rawdata_h5ad", ".h5ad")
+clusters_truth_path <- output_path(args, "rawdata_clusters_truth", ".clusters_truth.tsv")
+num_clusters_truth_path <- output_path(args, "rawdata_clusters_truth_num", ".clusters_truth_num.txt")
+properties_path <- output_path(args, "properties_info", "_properties.yaml")
 
 make_qc_df <- function(
   nFeature_min = NA_real_, nFeature_max = NA_real_,
